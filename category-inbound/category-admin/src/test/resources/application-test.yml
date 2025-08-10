@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    url: jdbc:tc:mysql:8:///test_db?TC_INITSCRIPT=init_mysql.sql
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+    show-sql: true
+
+logging:
+  level:
+    org.testcontainers: INFO
+    org.hibernate.SQL: DEBUG
