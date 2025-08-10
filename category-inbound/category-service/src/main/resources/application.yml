@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: category-service
+  docker:
+    compose:
+      enabled: off
+
+spring.config.import:
+  - optional:classpath:application-data-jpa.yml
+  - optional:classpath:application-data-redis.yml
+debug: true
