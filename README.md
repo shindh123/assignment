@@ -41,6 +41,10 @@ docker compose up -d
 * 서비스 API: http://localhost:8080/swagger-ui/index.html
 * 어드민 API: http://localhost:9090/swagger-ui/index.html
 
+### 데이터베이스 명세
+
+[SPEC.md](./category-outbound/category-jpa/SPEC.md) 파일을 참고
+
 --- 
 ## Architecture Overview
 ### 모듈 구조
@@ -67,3 +71,4 @@ hexagonal 아키텍처를 기반으로 한 모듈 구조입니다.
 |-------------------|-------------------------------|
 | 카테고리 어드민   | 카테고리 등록/수정/삭제, Read model 생성  |
 | 카테고리 서비스   | 카테고리 조회, Read Model 조회 |
+
