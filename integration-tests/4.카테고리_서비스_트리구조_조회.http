@@ -1,0 +1,228 @@
+import 4.카테고리_서비스_사전_데이터_생성.http
+
+### 사전 준비: 필요한 데이터 생성
+
+### 1. 전시 생성
+POST http://localhost:9090/admin/displays
+Content-Type: application/json
+
+{
+  "name": "카테고리 트리 테스트용 전시",
+  "description": "카테고리 트리 구조를 테스트하기 위한 전시입니다"
+}
+
+> {%
+    client.global.set("displayId", response.body.id);
+%}
+
+### 2. 최상위 카테고리 생성 (의류)
+POST http://localhost:9090/admin/categories
+Content-Type: application/json
+
+{
+  "name": "의류"
+}
+
+> {%
+    client.global.set("clothingCategoryId", response.body.id);
+%}
+
+### 3. 하위 카테고리 생성 (상의)
+POST http://localhost:9090/admin/categories
+Content-Type: application/json
+
+{
+  "name": "상의"
+}
+
+> {%
+    client.global.set("topsCategoryId", response.body.id);
+%}
+
+### 4. 하위 카테고리 생성 (하의)
+POST http://localhost:9090/admin/categories
+Content-Type: application/json
+
+{
+  "name": "하의"
+}
+
+> {%
+    client.global.set("bottomsCategoryId", response.body.id);
+%}
+
+### 5. 최하위 카테고리 생성 (티셔츠)
+POST http://localhost:9090/admin/categories
+Content-Type: application/json
+
+{
+  "name": "티셔츠"
+}
+
+> {%
+    client.global.set("tshirtCategoryId", response.body.id);
+%}
+
+### 6. 최하위 카테고리 생성 (청바지)
+POST http://localhost:9090/admin/categories
+Content-Type: application/json
+
+{
+  "name": "청바지"
+}
+
+> {%
+    client.global.set("jeansCategoryId", response.body.id);
+%}
+
+### 7. 카테고리-전시 매핑 (의류)
+POST http://localhost:9090/admin/mappings/displays/{{displayId}}/categories
+Content-Type: application/json
+
+{
+  "categoryId": {{clothingCategoryId}},
+  "order": 1
+}
+
+> {%
+%}
+
+### 8. 카테고리-전시 매핑 (의류 > 상의)
+POST http://localhost:9090/admin/mappings/displays/{{displayId}}/categories
+Content-Type: application/json
+
+{
+  "categoryId": {{topsCategoryId}},
+  "parentId": {{clothingCategoryId}},
+  "order": 1
+}
+
+> {%
+
+%}
+
+### 9. 카테고리-전시 매핑 (의류 > 하의)
+POST http://localhost:9090/admin/mappings/displays/{{displayId}}/categories
+Content-Type: application/json
+
+{
+  "categoryId": {{bottomsCategoryId}},
+  "parentId": {{clothingCategoryId}},
+  "order": 2
+}
+
+> {%
+
+%}
+
+### 10. 카테고리-전시 매핑 (의류 > 상의 > 티셔츠)
+POST http://localhost:9090/admin/mappings/displays/{{displayId}}/categories
+Content-Type: application/json
+
+{
+  "categoryId": {{tshirtCategoryId}},
+  "parentId": {{topsCategoryId}},
+  "order": 1
+}
+
+> {%
+
+%}
+
+### 11. 카테고리-전시 매핑 (의류 > 하의 > 청바지)
+POST http://localhost:9090/admin/mappings/displays/{{displayId}}/categories
+Content-Type: application/json
+
+{
+  "categoryId": {{jeansCategoryId}},
+  "parentId": {{bottomsCategoryId}},
+  "order": 1
+}
+
+> {%
+
+%}
+
+### 12. 전체 카테고리 트리 구조 조회
+GET http://localhost:8080/api/v1/displays/{{displayId}}/categories
+
+> {%
+    client.test("전체 카테고리 트리 구조 조회 성공", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+        client.assert(response.body !== null, "Response body should not be null");
+        client.assert(response.body.root.children.length > 0, "트리 구조에 최소 하나 이상의 자식 노드가 있어야 합니다");
+
+        // 최상위 카테고리(의류) 확인
+        let rootFound = response.body.root.categoryId === parseInt(client.global.get("clothingCategoryId"));
+        for (let i = 0; i < response.body.root.children.length; i++) {
+            if (response.body.root.children[i].categoryId === parseInt(client.global.get("clothingCategoryId"))) {
+                rootFound = true;
+                client.assert(response.body.root.children[i].children.length === 2, "의류 카테고리 아래 2개의 자식 노드가 있어야 합니다");
+                break;
+            }
+        }
+        client.assert(rootFound, "의류 카테고리가 트리에 존재해야 합니다");
+    });
+%}
+
+### 13. 특정 카테고리(상의)를 루트로 하는 서브트리 조회
+GET http://localhost:8080/api/v1/displays/{{displayId}}/categories?categoryId={{topsCategoryId}}
+
+> {%
+    client.test("상의 카테고리 서브트리 조회 성공", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+        client.assert(response.body !== null, "Response body should not be null");
+        client.assert(response.body.root.categoryId === parseInt(client.global.get("topsCategoryId")), "조회된 카테고리 ID가 상의 ID와 일치해야 합니다");
+        client.assert(response.body.root.children.length > 0, "상의 카테고리 아래 최소 하나 이상의 자식 노드가 있어야 합니다");
+
+        // 티셔츠 카테고리 확인
+        let tshirtFound = false;
+        for (let i = 0; i < response.body.root.children.length; i++) {
+            if (response.body.root.children[i].categoryId === parseInt(client.global.get("tshirtCategoryId"))) {
+                tshirtFound = true;
+                break;
+            }
+        }
+        client.assert(tshirtFound, "티셔츠 카테고리가 상의 서브트리에 존재해야 합니다");
+    });
+%}
+
+### 14. 특정 카테고리(하의)를 루트로 하는 서브트리 조회
+GET http://localhost:8080/api/v1/displays/{{displayId}}/categories?categoryId={{bottomsCategoryId}}
+
+> {%
+    client.test("하의 카테고리 서브트리 조회 성공", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+        client.assert(response.body !== null, "Response body should not be null");
+        client.assert(response.body.root.categoryId === parseInt(client.global.get("bottomsCategoryId")), "조회된 카테고리 ID가 하의 ID와 일치해야 합니다");
+        client.assert(response.body.root.children.length > 0, "하의 카테고리 아래 최소 하나 이상의 자식 노드가 있어야 합니다");
+
+        // 청바지 카테고리 확인
+        let jeansFound = false;
+        for (let i = 0; i < response.body.root.children.length; i++) {
+            if (response.body.root.children[i].categoryId === parseInt(client.global.get("jeansCategoryId"))) {
+                jeansFound = true;
+                break;
+            }
+        }
+        client.assert(jeansFound, "청바지 카테고리가 하의 서브트리에 존재해야 합니다");
+    });
+%}
+
+### 15. 존재하지 않는 카테고리 ID로 조회 시도 (에러 케이스)
+GET http://localhost:9090/api/v1/displays/{{displayId}}/categories?categoryId=999999
+
+> {%
+    client.test("존재하지 않는 카테고리 ID 조회 오류 확인", function() {
+        client.assert(response.status === 404 || response.status === 400, "잘못된 카테고리 ID 요청 시 404 또는 400 에러를 반환해야 한다");
+    });
+%}
+
+### 16. 존재하지 않는 전시 ID로 조회 시도 (에러 케이스)
+GET http://localhost:9090/api/v1/displays/999999/categories
+
+> {%
+    client.test("존재하지 않는 전시 ID 조회 오류 확인", function() {
+        client.assert(response.status === 404 || response.status === 400, "잘못된 전시 ID 요청 시 404 또는 400 에러를 반환해야 한다");
+    });
+%}

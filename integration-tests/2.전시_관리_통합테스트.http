@@ -1,0 +1,108 @@
+### 1. 메인 전시 생성
+POST http://localhost:9090/admin/displays
+Content-Type: application/json
+
+{
+  "name": "메인 전시",
+  "description": "메인 페이지에 노출되는 카테고리 전시입니다"
+}
+
+> {%
+    client.global.set("mainDisplayId", response.body.id);
+    client.test("메인 전시 생성 성공", function() {
+        client.assert(response.status === 201, "Response status is not 201");
+        client.assert(response.body.name === "메인 전시", "Display name does not match");
+        client.assert(response.body.description === "메인 페이지에 노출되는 카테고리 전시입니다", "Display description does not match");
+    });
+%}
+
+### 2. 서브 전시 생성
+POST http://localhost:9090/admin/displays
+Content-Type: application/json
+
+{
+  "name": "서브 전시",
+  "description": "서브 페이지에 노출되는 카테고리 전시입니다"
+}
+
+> {%
+    client.global.set("subDisplayId", response.body.id);
+    client.test("서브 전시 생성 성공", function() {
+        client.assert(response.status === 201, "Response status is not 201");
+        client.assert(response.body.name === "서브 전시", "Display name does not match");
+    });
+%}
+
+### 3. 모바일 전시 생성
+POST http://localhost:9090/admin/displays
+Content-Type: application/json
+
+{
+  "name": "모바일 전시",
+  "description": "모바일 앱에서 노출되는 카테고리 전시입니다"
+}
+
+> {%
+    client.global.set("mobileDisplayId", response.body.id);
+    client.test("모바일 전시 생성 성공", function() {
+        client.assert(response.status === 201, "Response status is not 201");
+        client.assert(response.body.name === "모바일 전시", "Display name does not match");
+    });
+%}
+
+### 4. 전시 단건 조회
+GET http://localhost:9090/admin/displays/{{mainDisplayId}}
+
+> {%
+    client.test("전시 조회 성공", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+        client.assert(response.body.id === parseInt(client.global.get("mainDisplayId")), "Display ID does not match");
+        client.assert(response.body.name === "메인 전시", "Display name does not match");
+    });
+%}
+
+### 5. 전시 목록 조회
+GET http://localhost:9090/admin/displays?page=0&size=10
+
+> {%
+    client.test("전시 목록 조회 성공", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+        client.assert(response.body.content.length >= 3, "Should have at least 3 displays");
+    });
+%}
+
+### 6. 전시 정보 수정
+PUT http://localhost:9090/admin/displays/{{subDisplayId}}
+Content-Type: application/json
+
+{
+  "name": "서브 전시 (수정됨)",
+  "description": "서브 페이지에 노출되는 카테고리 전시입니다 (수정됨)"
+}
+
+> {%
+    client.test("전시 정보 수정 성공", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+        client.assert(response.body.id === parseInt(client.global.get("subDisplayId")), "Display ID does not match");
+        client.assert(response.body.name === "서브 전시 (수정됨)", "Display name was not updated");
+        client.assert(response.body.description === "서브 페이지에 노출되는 카테고리 전시입니다 (수정됨)", "Display description was not updated");
+    });
+%}
+
+### 7. 전시 삭제
+DELETE http://localhost:9090/admin/displays/{{mobileDisplayId}}
+
+> {%
+    client.test("전시 삭제 성공", function() {
+        client.assert(response.status === 204, "Response status is not 204");
+    });
+%}
+
+### 8. 삭제 확인 (삭제된 전시 조회)
+GET http://localhost:9090/admin/displays/{{mobileDisplayId}}
+
+> {%
+    client.test("삭제된 전시 조회 실패", function() {
+        client.assert(response.status === 404, "Response status is not 404");
+    });
+%}

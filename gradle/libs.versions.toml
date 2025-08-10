@@ -1,0 +1,22 @@
+[versions]
+spring-boot = '3.5.4'
+spring-cloud = '2024.0.0'
+spring-dependency = '1.1.7'
+springdoc = '2.8.9'
+kotlin = '1.9.25'
+
+
+[libraries]
+spring-boot-dependencies = { module = 'org.springframework.boot:spring-boot-dependencies', version.ref = 'spring-boot' }
+spring-boot-configuration-processor = { module = 'org.springframework.boot:spring-boot-configuration-processor', version.ref = 'spring-boot' }
+spring-cloud-dependencies = { module = 'org.springframework.cloud:spring-cloud-dependencies', version.ref = 'spring-cloud' }
+springdoc-openapi-starter-common = { module = 'org.springdoc:springdoc-openapi-starter-common', version.ref = 'springdoc' }
+springdoc-openapi-starter-webmvc-ui = { module = 'org.springdoc:springdoc-openapi-starter-webmvc-ui', version.ref = 'springdoc' }
+springdoc-openapi-starter-webmvc-api = { module = 'org.springdoc:springdoc-openapi-starter-webmvc-api', version.ref = 'springdoc' }
+
+[plugins]
+spring-boot = { id = 'org.springframework.boot', version.ref = 'spring-boot' }
+spring-dependency-management = { id = 'io.spring.dependency-management', version.ref = 'spring-dependency' }
+kotlin-jvm = {id = 'org.jetbrains.kotlin.jvm' , version.ref = 'kotlin'}
+kotlin-spring = {id = 'org.jetbrains.kotlin.plugin.spring' , version.ref = 'kotlin'}
+kotlin-jpa = {id = 'org.jetbrains.kotlin.plugin.jpa' , version.ref = 'kotlin'}
